@@ -19,7 +19,7 @@ public class Player extends GameObject{
 
         public Player( Bitmap res, int w, int h, int numFrames)
         {
-            x = 100;
+            x = GamePanel.WIDTH/10;
             y = GamePanel.HEIGHT/2;
             dy = 0;
             score = 0;
@@ -57,19 +57,36 @@ public class Player extends GameObject{
 
             animation.update();
 
-            if(up)
-            {
-                dy = ( int ) (dya-=1.1);
-            }
-            else{
-                dy = ( int ) (dya+=1.1);
+            if(up) {
+                y = (int) (y - (GamePanel.HEIGHT/15));
+                x = (int) (x + (GamePanel.MOVESPEED * 2));
+            }else{
+                y = (int)(y + (GamePanel.HEIGHT/15));
+                //x = (int) (x + (GamePanel.WIDTH/400));
+                x = (int) (x + (GamePanel.MOVESPEED * 2));
             }
 
-            if( dy > 14 ) dy = 14;
-            if( dy <-14 ) dy = -14;
+            // make sure that the bird does not cross
+            // side borders
+            if( x > (5 * GamePanel.WIDTH)/6) {
+                x = (5 * GamePanel.WIDTH)/6; //- width;
+            }
+            if( x < 0 ){
+                x = 0;
+            }
 
-            x += dy * 2;
-            dy = 0;
+            // make sure that the bird does not cross
+            // the bottom and top border
+            if (y > GamePanel.HEIGHT - (height * 2)){
+                y = GamePanel.HEIGHT - (height * 2);
+            }
+            if (y < height){
+                y = height;
+            }
+
+            // keep the bird moving with the background
+            // if it is not accelerating as it moves up
+            x -= GamePanel.MOVESPEED;
         }
 
     public void draw( Canvas canvas )
@@ -101,4 +118,5 @@ public class Player extends GameObject{
     {
         score = 0;
     }
+
 }
