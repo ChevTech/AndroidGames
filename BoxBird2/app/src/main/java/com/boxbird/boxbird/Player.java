@@ -86,7 +86,7 @@ public class Player extends GameObject{
 
             // keep the bird moving with the background
             // if it is not accelerating as it moves up
-            x -= GamePanel.MOVESPEED;
+            //x -= GamePanel.MOVESPEED;
         }
 
     public void draw( Canvas canvas )
