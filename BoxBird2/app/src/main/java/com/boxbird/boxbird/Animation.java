@@ -58,4 +58,7 @@ public class Animation {
         return playedOnce;
     }
 
+    public int getFrameWidth(){
+        return frames.length;
+    };
 }

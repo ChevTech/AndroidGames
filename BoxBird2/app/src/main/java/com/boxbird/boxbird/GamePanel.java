@@ -4,11 +4,11 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.CountDownTimer;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -73,14 +73,27 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         gloves = new ArrayList<Glove>();
         glove_start_time = System.nanoTime();
 
-        thread.setRunning( true );
-        thread.start();
+        // 3 second timer before starting the game
+        /*
+        new CountDownTimer(3000, 1000){
+
+            public void onTick(long millisUntilFinished){
+                countDownText.setText(millisUntilFinished/1000);
+            }
+
+            public void onFinish(){
+                countDownText.setText("Go!");
+
+            }
+        }.start();
+        */
+         thread.setRunning( true );
+            thread.start();
     }
 
     @Override
     public boolean onTouchEvent( MotionEvent event )
     {
-
         if( event.getAction() == MotionEvent.ACTION_DOWN )
         {
             if( !player.getPlaying()) {
@@ -144,7 +157,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
                     break;
                 }
                 //remove missile if it is way off the screen
-                if(gloves.get(i).getX()< -100)
+                if(gloves.get(i).getXCoordinate()< -100)
                 {
                     gloves.remove(i);
                     break;

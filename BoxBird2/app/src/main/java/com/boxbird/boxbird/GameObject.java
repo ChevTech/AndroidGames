@@ -6,31 +6,31 @@ import android.graphics.Rect;
  * Created by Stoyta on 11/28/2015.
  */
 public abstract class GameObject {
-    protected int x;
-    protected int y;
+    protected int xCoordinate;
+    protected int yCoordinate;
     protected int dy;
     protected int dx;
     protected int width;
     protected int height;
 
-    public void setX( int x )
+    public void setxCoordinate(int xCoordinate)
     {
-        this.x = x;
+        this.xCoordinate = xCoordinate;
     }
 
-    public int getX()
+    public int getXCoordinate()
     {
-        return x;
+        return xCoordinate;
     }
 
-    public void setY( int y )
+    public void setyCoordinate(int yCoordinate)
     {
-        this.y = y;
+        this.yCoordinate = yCoordinate;
     }
 
-    public int getY()
+    public int getyCoordinate()
     {
-        return y;
+        return yCoordinate;
     }
 
     public int getHeight()
@@ -45,7 +45,7 @@ public abstract class GameObject {
 
     public Rect getRectangle()
     {
-        return new Rect( x, y, x+width, y+height );
+        return new Rect(xCoordinate, yCoordinate, xCoordinate +width, yCoordinate +height );
     }
 
 }
