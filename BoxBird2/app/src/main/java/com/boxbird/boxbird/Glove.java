@@ -23,10 +23,10 @@ public class Glove extends GameObject{
 
     public Glove(Bitmap res, int x, int w, int h, int s, int numFrames, boolean ground)
     {
-        super.x = x;
-        super.y = GamePanel.HEIGHT - h;
+        super.xCoordinate = x;
+        super.yCoordinate = GamePanel.HEIGHT - h;
         if (ground == false){
-            super.y = h;
+            super.yCoordinate = h;
         }
 
         this.ground = ground;
@@ -53,16 +53,16 @@ public class Glove extends GameObject{
     public void update()
     {
         shoot_update();
-        x += speed;
+        xCoordinate += speed;
         animation.update();
     }
 
     private void shoot_update(){
         if (shoot == false){
             if (ground){
-                y = GamePanel.HEIGHT - height;
+                yCoordinate = GamePanel.HEIGHT - height;
             }else{
-                y = height;
+                yCoordinate = height;
             }
             int start = new Random().nextInt(20);
             if (start % 3 == 0){
@@ -71,9 +71,9 @@ public class Glove extends GameObject{
         }
         if (shoot){
             if (ground){
-                y -= direction * spring_speed;
+                yCoordinate -= direction * spring_speed;
             }else{
-                y += direction * spring_speed;
+                yCoordinate += direction * spring_speed;
             }
             stretch += spring_speed;
         }
@@ -90,7 +90,7 @@ public class Glove extends GameObject{
     public void draw(Canvas canvas)
     {
         try{
-            canvas.drawBitmap(animation.getImage(),x,y,null);
+            canvas.drawBitmap(animation.getImage(), xCoordinate, yCoordinate,null);
         }catch(Exception e){}
     }
 

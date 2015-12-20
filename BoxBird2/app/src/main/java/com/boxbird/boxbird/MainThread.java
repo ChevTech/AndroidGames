@@ -22,7 +22,7 @@ public class MainThread extends Thread
         this.gamePanel = gamePanel;
     }
 
-    @Override
+        @Override
     public void run()
     {
         long startTime;
