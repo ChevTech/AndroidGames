@@ -19,7 +19,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
 {
     public static final int WIDTH = 601;
     public static final int HEIGHT = 301;
-    public static final int MOVESPEED = -5;
+    public static final int BACKGROUND_MOVESPEED = -5;
     private MainThread thread;
     private Background background;
     private Player player;
@@ -101,17 +101,14 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
             }
             else
             {
-                player.setUp( false );
+                player.setUp( true );
             }
             return true;
         }
         if( event.getAction() == MotionEvent.ACTION_UP)
         {
-            player.setUp(true);
+            player.setUp( false );
             return true;
-        }
-        if (event.getAction() == MotionEvent.ACTION_MOVE){
-
         }
 
         return super.onTouchEvent( event );
@@ -188,7 +185,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
             canvas.restoreToCount(savedState);
         }
     }
-
 
     public boolean collision(GameObject a, GameObject b)
     {

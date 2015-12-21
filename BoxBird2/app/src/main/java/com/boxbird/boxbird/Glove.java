@@ -23,6 +23,7 @@ public class Glove extends GameObject{
 
     public Glove(Bitmap res, int x, int w, int h, int s, int numFrames, boolean ground)
     {
+        //this needs to be removed as a dependency on player's x coordinate
         super.xCoordinate = x;
         super.yCoordinate = GamePanel.HEIGHT - h;
         if (ground == false){
@@ -35,7 +36,7 @@ public class Glove extends GameObject{
         height = h;
         score = s;
 
-        speed = GamePanel.MOVESPEED;
+        speed = GamePanel.BACKGROUND_MOVESPEED;
 
         Bitmap[] image = new Bitmap[numFrames];
 
