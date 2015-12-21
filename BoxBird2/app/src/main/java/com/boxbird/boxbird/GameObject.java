@@ -13,7 +13,7 @@ public abstract class GameObject {
     protected int width;
     protected int height;
 
-    public void setxCoordinate(int xCoordinate)
+    public void setXCoordinate(int xCoordinate)
     {
         this.xCoordinate = xCoordinate;
     }
@@ -23,12 +23,12 @@ public abstract class GameObject {
         return xCoordinate;
     }
 
-    public void setyCoordinate(int yCoordinate)
+    public void setYCoordinate(int yCoordinate)
     {
         this.yCoordinate = yCoordinate;
     }
 
-    public int getyCoordinate()
+    public int getYCoordinate()
     {
         return yCoordinate;
     }

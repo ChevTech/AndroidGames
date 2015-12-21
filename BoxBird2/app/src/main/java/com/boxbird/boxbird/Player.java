@@ -19,6 +19,7 @@ public class Player extends GameObject{
         private long startTime;
 
 
+
         public Player( Bitmap res, int w, int h, int numFrames)
         {
 
@@ -31,11 +32,11 @@ public class Player extends GameObject{
             height = h;
             width  = w;
 
-            // Consider changing this from hardcoded Acceleration to width of frame being updated.
-            playerHorizontalAcceleration = 10;
+            // Reverse the movement direction of the screen for the bird
+            playerHorizontalAcceleration = Math.abs( GamePanel.BACKGROUND_MOVESPEED ) * 2;
 
             // Bird gravity
-            gravity = 5;
+            gravity = -9.8;
 
             Bitmap[] image = new Bitmap[ numFrames ];
             spritesheet = res;
@@ -51,11 +52,6 @@ public class Player extends GameObject{
 
         }
 
-        public void setUp( boolean b )
-        {
-            up = b;
-        }
-
         public void update()
         {
             // Set-up timer to track animation update frequency
@@ -69,39 +65,39 @@ public class Player extends GameObject{
 
             // Update animation and keep the bird horizontally fixed.
             animation.update();
-            xCoordinate += playerHorizontalAcceleration;
+            //xCoordinate = playerHorizontalAcceleration;
 
             if(up) {
-                yCoordinate = (int) (yCoordinate + (GamePanel.HEIGHT/15));
-                xCoordinate = (int) (xCoordinate + (GamePanel.MOVESPEED * 2));
+                yCoordinate = (int) ( yCoordinate - ( GamePanel.HEIGHT/10 ) );
+                //xCoordinate = (int) ( xCoordinate + playerHorizontalAcceleration );
             }else{
-                yCoordinate = (int)(yCoordinate - gravity );
-                //xCoordinate = (int) (xCoordinate + (GamePanel.WIDTH/400));
-                xCoordinate = (int) (xCoordinate + (GamePanel.MOVESPEED * 2));
+                yCoordinate = (int) ( yCoordinate - gravity );
+                //xCoordinate = (int) ( xCoordinate + ( GamePanel.BACKGROUND_MOVESPEED * 2 ) );
             }
 
             // make sure that the bird does not cross side borders
-            if( xCoordinate > (5 * GamePanel.WIDTH)/6) {
+            if( xCoordinate > ( 5 * GamePanel.WIDTH )/6 ) {
                 xCoordinate += playerHorizontalAcceleration;
             }
 
             // make sure that the bird does not cross the bottom or top border
-            if (yCoordinate > GamePanel.HEIGHT - (height )){
-                yCoordinate = GamePanel.HEIGHT - (height );
+            if( yCoordinate > GamePanel.HEIGHT - ( height ) ){
+                yCoordinate = GamePanel.HEIGHT - ( height );
             }
 
-            if (yCoordinate <= 0 ){
+            if( yCoordinate <= 0 ){
                 yCoordinate = 0;
             }
-
-            // keep the bird moving with the background
-            // if it is not accelerating as it moves up
-            //xCoordinate -= GamePanel.MOVESPEED;
         }
 
     public void draw( Canvas canvas )
     {
         canvas.drawBitmap( animation.getImage(), xCoordinate, yCoordinate, null);
+    }
+
+    public void setUp( boolean b )
+    {
+        up = b;
     }
 
     public int getScore()

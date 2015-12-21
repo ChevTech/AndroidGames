@@ -13,7 +13,7 @@ public class Background {
 
     public Background(Bitmap res){
         image = res;
-        dx = GamePanel.MOVESPEED;
+        dx = GamePanel.BACKGROUND_MOVESPEED;
     }
 
     public void update(){
