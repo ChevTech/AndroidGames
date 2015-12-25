@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -34,6 +35,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
     private long score_timer;
     private boolean gloves_on = false;
     private boolean ground = false;
+    private MediaPlayer mp;
 
     public GamePanel( Context context)
     {
@@ -44,6 +46,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         thread = new MainThread( getHolder(), this );
 
         setFocusable( true );
+
+        // creates the media player
+        mp = MediaPlayer.create(context, R.raw.bats);
     }
 
     @Override
@@ -135,17 +140,21 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
                 }
                 gloves.get(i).update();
 
-                if(collision(gloves.get(i), player))
-                {
+                if(collision(gloves.get(i), player)) {
                     player.setPlaying(false);
-                    System.out.println("Hit");
+                    player.collided = true;
+                    player.updateImage(BitmapFactory.decodeResource(getResources(), R.drawable.scared_bird), 58, 50, 1);
+
+                    thread.setRunning(false);
                     break;
                 }
                 //remove missile if it is way off the screen
                 if(gloves.get(i).getXCoordinate()< -100)
                 {
                     gloves.remove(i);
-                    break;
+
+                    //why is there a break here????
+                    //break;
                 }
             }
 
@@ -236,6 +245,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+    // Checks if the player and a given glove collides or not
     public boolean collision(GameObject a, GameObject b)
     {
         if(Rect.intersects(a.getRectangle(), b.getRectangle())){

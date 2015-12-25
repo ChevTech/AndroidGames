@@ -45,7 +45,7 @@ public abstract class GameObject {
 
     public Rect getRectangle()
     {
-        return new Rect(xCoordinate, yCoordinate, xCoordinate +width, yCoordinate +height );
+        return new Rect(xCoordinate, yCoordinate + (int)(height * 0.1), xCoordinate + width, yCoordinate + (int)(height * 0.9) );
     }
 
 }
