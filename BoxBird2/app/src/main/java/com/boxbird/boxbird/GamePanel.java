@@ -3,7 +3,11 @@ package com.boxbird.boxbird;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -19,15 +23,19 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
 {
     public static final int WIDTH = 601;
     public static final int HEIGHT = 301;
-    public static final int BACKGROUND_MOVESPEED = -5;
+    public static final int BACKGROUND_MOVESPEED = -10;
+    public static final long second = 1000000000;
     private MainThread thread;
     private Background background;
     private Player player;
-    private long glove_start_time;
+    private long game_start_time;
     private ArrayList<Glove> gloves;
     private Random rand = new Random();
-    private int level = 1;
-    private int total_updates = 1;
+    private int score = 0;
+    private long score_timer;
+    private boolean gloves_on = false;
+    private boolean ground = false;
+    private MediaPlayer mp;
 
     public GamePanel( Context context)
     {
@@ -38,6 +46,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         thread = new MainThread( getHolder(), this );
 
         setFocusable( true );
+
+        // creates the media player
+        mp = MediaPlayer.create(context, R.raw.bats);
     }
 
     @Override
@@ -71,7 +82,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         player = new Player( BitmapFactory.decodeResource( getResources(), R.drawable.bird ), 63, 50, 5 );
 
         gloves = new ArrayList<Glove>();
-        glove_start_time = System.nanoTime();
 
         // 3 second timer before starting the game
         /*
@@ -87,80 +97,71 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
             }
         }.start();
         */
-         thread.setRunning( true );
-            thread.start();
+        thread.setRunning( true );
+        thread.start();
     }
 
     @Override
     public boolean onTouchEvent( MotionEvent event )
     {
-        if( event.getAction() == MotionEvent.ACTION_DOWN )
-        {
+        if( event.getAction() == MotionEvent.ACTION_DOWN ) {
             if( !player.getPlaying()) {
                 player.setPlaying(true);
+                game_start_time = System.nanoTime();
+                score_timer = System.nanoTime();
             }
-            else
-            {
+            else {
                 player.setUp( true );
             }
             return true;
         }
         if( event.getAction() == MotionEvent.ACTION_UP)
         {
-            player.setUp( false );
+            player.setUp(false);
             return true;
         }
 
         return super.onTouchEvent( event );
     }
 
-    public void update()
-    {
-        if( player.getPlaying() )
-        {
+    public void update() {
+        if(player.getPlaying()) {
             background.update();
             player.update();
-/*            addGloves();
-            increaseLevel();
-            for (int i=0; i < gloves.size(); i++){
-                gloves.get(i).update();
-            }*/
+            add_gloves();
 
-            //add missiles on timer
-            long glove_elapsed = (System.nanoTime() - glove_start_time)/1000000;
-            if(total_updates % 50 == 0){
-
-                boolean ground = false;
-                if (rand.nextInt(2) == 0){
-                    ground = true;
-                }
-                System.out.println("add a glove");
-
-                gloves.add(new Glove(BitmapFactory.decodeResource(getResources(),R.drawable.boxing_glove),
-                        WIDTH - 30, 26, 21, player.getScore(), 1, ground));
-                //reset timer
-                glove_start_time = System.nanoTime();
-            }
             //loop through every missile and check collision and remove
-            for(int i = 0; i<gloves.size();i++)
-            {
-                //update missile
+            for(int i = 0; i<gloves.size();i++) {
+
+                if(playerCloseBy(gloves.get(i)) && !gloves.get(i).hasPunched()){
+                    gloves.get(i).updateImage(BitmapFactory.decodeResource(getResources(), R.drawable.glove_spring), 50, 123, 1);
+                } else if (playerCloseBy(gloves.get(i)) && gloves.get(i).hasPunched()){
+                    gloves.get(i).updateImage(BitmapFactory.decodeResource(getResources(), R.drawable.glove_spring), 50, 49, 1);
+                }
                 gloves.get(i).update();
 
-                if(collision(gloves.get(i), player))
-                {
+                if(collision(gloves.get(i), player)) {
                     player.setPlaying(false);
-                    System.out.println("Hit");
+                    player.collided = true;
+                    player.updateImage(BitmapFactory.decodeResource(getResources(), R.drawable.scared_bird), 58, 50, 1);
+
+                    thread.setRunning(false);
                     break;
                 }
                 //remove missile if it is way off the screen
                 if(gloves.get(i).getXCoordinate()< -100)
                 {
                     gloves.remove(i);
-                    break;
+
+                    //why is there a break here????
+                    //break;
                 }
             }
-            total_updates += 1;
+
+            if (System.nanoTime() - score_timer > 2 * second){
+                score += 1;
+                score_timer = System.nanoTime();
+            }
         }
     }
 
@@ -179,17 +180,75 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
             for(Glove g: gloves)
             {
                 g.draw(canvas);
+                g.setPunched(!g.hasPunched());
             }
-            total_updates += 1;
-            System.out.println("total updates: " + total_updates);
+            showScore(canvas);
             canvas.restoreToCount(savedState);
         }
     }
 
+    public void add_gloves(){
+        if(gloves_on){
+            if (gloves.size() > 0){
+                Glove last_glove = gloves.get(gloves.size() - 1);
+                if (WIDTH - last_glove.getXCoordinate() >= 2 * player.getWidth()){
+                    setGround();
+                    gloves.add(new Glove(BitmapFactory.decodeResource(getResources(), R.drawable.glove_stationary),
+                            WIDTH, 50, 49, 5, ground));
+                }
+            } else{
+                gloves.add(new Glove(BitmapFactory.decodeResource(getResources(), R.drawable.glove_stationary),
+                        WIDTH, 50, 49, 5, ground));
+            }
+        } else{
+            if (System.nanoTime() - game_start_time > 2 * second){
+                gloves_on = true;
+            }
+        }
+    }
+
+    // Sets the level at which the glove will be drawn - up or down.
+    private void setGround(){
+        if (gloves.size() > 1){
+            if (gloves.get(gloves.size()-1).getGround() == gloves.get(gloves.size()-2).getGround()){
+                ground = !gloves.get(gloves.size()-1).getGround();
+            } else {
+                if (rand.nextInt(2) == 0){
+                    ground = true;
+                }
+            }
+        }
+    }
+
+    // Shows the score on the top right hand corner.
+    // The score is based on how long a player lasts.
+    private void showScore(Canvas canvas){
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(30);
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        canvas.drawText(String.valueOf(score), WIDTH - 50, 40, paint);
+    }
+
+    // Checks if the player is close to a glove or not.
+    // Returns true if the player is close.
+    // Otherwise returns false.
+    private boolean playerCloseBy(Glove glove){
+        if (player.getXCoordinate() <= glove.getXCoordinate() &&
+                player.getXCoordinate() >= (glove.getXCoordinate() - (3 * player.getWidth()))){
+            return true;
+        } else if (player.getXCoordinate() > glove.getXCoordinate() &&
+                glove.getXCoordinate() > (player.getXCoordinate() - (2 * player.getWidth()))){
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+    // Checks if the player and a given glove collides or not
     public boolean collision(GameObject a, GameObject b)
     {
-        if(Rect.intersects(a.getRectangle(), b.getRectangle()))
-        {
+        if(Rect.intersects(a.getRectangle(), b.getRectangle())){
             return true;
         }
         return false;

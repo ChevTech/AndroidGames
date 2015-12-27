@@ -2,6 +2,7 @@ package com.boxbird.boxbird;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 
 /**
  * Created by riasat.ullah on 12/5/2015.
@@ -9,42 +10,40 @@ import android.graphics.Canvas;
 import java.util.Random;
 
 public class Glove extends GameObject{
-    private int score;
     private int speed;
     private Random rand = new Random();
     private Animation animation = new Animation();
     private Bitmap spritesheet;
+    private int numframes;
     private boolean ground;
     private boolean shoot = false;
-    private int stretch = 0;
-    private int spring_speed = 40;
-    private int direction = 1;
-    private int spring_length;
+    private int rotation_degree = 0;
+    private Matrix matrix = new Matrix();
+    public boolean punched = false;
 
-    public Glove(Bitmap res, int x, int w, int h, int s, int numFrames, boolean ground)
+    public Glove(Bitmap res, int x, int w, int h, int numframes, boolean ground)
     {
-        //this needs to be removed as a dependency on player's x coordinate
+        spritesheet = res;
         super.xCoordinate = x;
         super.yCoordinate = GamePanel.HEIGHT - h;
-        if (ground == false){
-            super.yCoordinate = h;
-        }
-
-        this.ground = ground;
-        spring_length = (int) (GamePanel.HEIGHT/3 - h);
         width = w;
         height = h;
-        score = s;
+        this.numframes = numframes;
+        this.ground = ground;
+
+        if (ground == false){
+            super.yCoordinate = 0;
+            rotation_degree = 180;
+        }
+
+        matrix.postRotate(rotation_degree);
 
         speed = GamePanel.BACKGROUND_MOVESPEED;
 
-        Bitmap[] image = new Bitmap[numFrames];
+        Bitmap[] image = new Bitmap[numframes];
 
-        spritesheet = res;
-
-        for(int i = 0; i<image.length;i++)
-        {
-            image[i] = Bitmap.createBitmap(spritesheet, 0, i*height, width, height);
+        for(int i = 0; i< numframes;i++) {
+            image[i] = Bitmap.createBitmap(spritesheet, i * width, 0, width, height, matrix, true);
         }
 
         animation.setFrames(image);
@@ -53,39 +52,12 @@ public class Glove extends GameObject{
 
     public void update()
     {
-        shoot_update();
         xCoordinate += speed;
         animation.update();
     }
 
-    private void shoot_update(){
-        if (shoot == false){
-            if (ground){
-                yCoordinate = GamePanel.HEIGHT - height;
-            }else{
-                yCoordinate = height;
-            }
-            int start = new Random().nextInt(20);
-            if (start % 3 == 0){
-                shoot = true;
-            }
-        }
-        if (shoot){
-            if (ground){
-                yCoordinate -= direction * spring_speed;
-            }else{
-                yCoordinate += direction * spring_speed;
-            }
-            stretch += spring_speed;
-        }
-        if (stretch > spring_length){
-            direction = -1 * direction;
-        }
-        if (stretch < 0){
-            stretch = 0;
-            direction = 1;
-            shoot = false;
-        }
+    public void updateNumFrames(int num){
+        numframes = num;
     }
 
     public void draw(Canvas canvas)
@@ -102,4 +74,40 @@ public class Glove extends GameObject{
         return width-10;
     }
 
+    public boolean getGround(){
+        return ground;
+    }
+
+    // Checks if a glove has punched or not
+    // If it has then returns true.
+    // This will help us to alternate betweeen images.
+    public boolean hasPunched(){
+        return punched;
+    }
+
+    // Sets a boolean value to specify whether the glove
+    // has shot out and punched or not. This helps to control
+    // the punching motion.
+    public void setPunched(boolean value){ punched = value; }
+
+    // Updates the image of the glove in order to get the boxing motion
+    public void updateImage(Bitmap res, int w, int h, int numframes){
+        spritesheet = res;
+        width = w;
+        height = h;
+        this.numframes = numframes;
+
+        if (ground){
+            super.yCoordinate = GamePanel.HEIGHT - h;
+        }
+
+        Bitmap[] image = new Bitmap[numframes];
+
+        for(int i = 0; i< numframes;i++) {
+            image[i] = Bitmap.createBitmap(spritesheet, i * width, 0, width, height, matrix, true);
+        }
+
+        animation.setFrames(image);
+        animation.setDelay(100-speed);
+    }
 }
